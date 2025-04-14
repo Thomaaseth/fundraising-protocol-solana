@@ -9,6 +9,8 @@ pub const MAX_DESCRIPTION_LENGTH: usize = 1000;
 
 #[program]
 pub mod fundraising_protocol {
+    use core::time;
+
     use super::*;
 
     // Initialize a new crowdfunded project
@@ -17,6 +19,7 @@ pub mod fundraising_protocol {
         title: String,
         description: String,
         funding_goal: u64,
+        timestamp: i64,
     ) -> Result<()> {
 
         // Check inputs
@@ -35,7 +38,7 @@ pub mod fundraising_protocol {
         project.description = description;
         project.funding_goal = funding_goal;
         project.deadline = current_time + 30 * 24 * 60 * 60; // 30 days from init
-        project.project_id = current_time as u64; // using timestamp as project_id
+        project.project_id = timestamp as u64; // using timestamp as project_id
         project.is_success = false;
         project.is_finalized = false;
         project.bump = ctx.bumps.project;
@@ -69,13 +72,13 @@ pub struct Project {
 
 impl Project {
     pub const SIZE: usize = 32 + // Creator pubkey
-    4 + MAX_TITLE_LENGTH +   // title (string)
+    4 + MAX_TITLE_LENGTH +       // title (string)
     4 + MAX_DESCRIPTION_LENGTH + // description (string)
-    8 +                         // funding goal (u64)
-    8 +                         // deadline (i64)
-    8 +                         // project_id (u64)
-    1 +                         // is_success (bool)
-    1 +                         // is_finalized (bool)
+    8 +                          // funding goal (u64)
+    8 +                          // deadline (i64)
+    8 +                          // project_id (u64)
+    1 +                          // is_success (bool)
+    1 +                          // is_finalized (bool)
     1;                           // bump (u8)
 }
 
@@ -115,7 +118,7 @@ impl Contribution {
 
 
 #[derive(Accounts)]
-#[instruction(title: String, description: String, funding_goal: u64)]
+#[instruction(title: String, description: String, funding_goal: u64, timestamp: i64)]
 pub struct InitializeProject<'info> {
     #[account(mut)]
     pub creator: Signer<'info>,
@@ -126,7 +129,7 @@ pub struct InitializeProject<'info> {
         seeds = [
             b"project",
             creator.key().as_ref(),
-            Clock::get().unwrap().unix_timestamp.to_le_bytes().as_ref()
+            &timestamp.to_le_bytes()
         ],
         bump
     )]
