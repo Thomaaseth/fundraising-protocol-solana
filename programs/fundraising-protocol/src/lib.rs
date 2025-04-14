@@ -9,9 +9,15 @@ pub const MAX_DESCRIPTION_LENGTH: usize = 1000;
 
 #[program]
 pub mod fundraising_protocol {
-    use core::time;
-
     use super::*;
+
+    // Initialize a global project counter
+    pub fn initialize_counter(ctx: Context<InitializeCounter>) -> Result<()> {
+        let counter = &mut ctx.accounts.project_counter;
+        counter.count = 0;
+        counter.bump = ctx.bumps.project_counter;
+        Ok(())
+    }
 
     // Initialize a new crowdfunded project
     pub fn initialize_project(
@@ -19,7 +25,6 @@ pub mod fundraising_protocol {
         title: String,
         description: String,
         funding_goal: u64,
-        timestamp: i64,
     ) -> Result<()> {
 
         // Check inputs
@@ -29,7 +34,9 @@ pub mod fundraising_protocol {
         require!(description.len() <= MAX_DESCRIPTION_LENGTH, ErrorCode::DescriptionTooLong);
         require!(funding_goal > 0, ErrorCode::InvalidFundingGoal);
 
-        let current_time = Clock::get().unwrap().unix_timestamp;
+        let current_time: i64 = Clock::get().unwrap().unix_timestamp;
+        let counter = &mut ctx.accounts.project_counter;
+        counter.count += 1;
 
         // Init project account
         let project = &mut ctx.accounts.project;
@@ -38,7 +45,7 @@ pub mod fundraising_protocol {
         project.description = description;
         project.funding_goal = funding_goal;
         project.deadline = current_time + 30 * 24 * 60 * 60; // 30 days from init
-        project.project_id = timestamp as u64; // using timestamp as project_id
+        project.project_id = counter.count; // using counter as project_id
         project.is_success = false;
         project.is_finalized = false;
         project.bump = ctx.bumps.project;
@@ -58,13 +65,24 @@ pub mod fundraising_protocol {
 
 // Accounts struct for the project PDA
 #[account]
+pub struct ProjectCounter {
+    pub count: u64,
+    pub bump: u8,
+}
+
+impl ProjectCounter {
+    pub const SIZE: usize = 8 + // count (u64)
+    1;                          // bump (u8)
+}
+
+#[account]
 pub struct Project {
     pub creator: Pubkey,        // Creator public key
     pub title: String,          
     pub description: String,
     pub funding_goal: u64,      // Funding goal in lamports
     pub deadline: i64,          // Deadline timestamp
-    pub project_id: u64,
+    pub project_id: u64,        // Project id (from counter)
     pub is_success: bool,
     pub is_finalized: bool,
     pub bump: u8,               // PDA Bump seed
@@ -118,10 +136,37 @@ impl Contribution {
 
 
 #[derive(Accounts)]
-#[instruction(title: String, description: String, funding_goal: u64, timestamp: i64)]
+pub struct InitializeCounter<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    
+    #[account(
+        init,
+        payer = payer,
+        space = 8 + ProjectCounter::SIZE,
+        seeds = [b"project-counter"],
+        bump
+    )]
+    pub project_counter: Account<'info, ProjectCounter>,
+    
+    pub system_program: Program<'info, System>,
+}
+
+
+#[derive(Accounts)]
+#[instruction(title: String, description: String, funding_goal: u64)]
 pub struct InitializeProject<'info> {
     #[account(mut)]
     pub creator: Signer<'info>,
+    
+    #[account(
+        mut,
+        seeds = [b"project-counter"],
+        bump = project_counter.bump
+    )]
+    pub project_counter: Account<'info, ProjectCounter>,
+    
+    
     #[account(
         init,
         payer = creator,
@@ -129,12 +174,13 @@ pub struct InitializeProject<'info> {
         seeds = [
             b"project",
             creator.key().as_ref(),
-            &timestamp.to_le_bytes()
+            &(project_counter.count + 1).to_le_bytes()
         ],
         bump
     )]
 
     pub project: Account<'info, Project>,
+    
     #[account(
         init,
         payer = creator,
