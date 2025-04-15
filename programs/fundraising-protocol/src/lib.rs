@@ -475,3 +475,12 @@ pub enum ErrorCode {
     #[msg("Invalid contribution for this project")]
     InvalidContribution,
 }
+
+// Current limitations:
+// Only project creator can finalize a project to allow refunds
+// Contributors must claim refunds individually for each contributions
+// No partial funding option (all or nothing)
+// Only support SOL
+// Fixed 30 day duration
+// No way to cancel project
+// No admin control (maybe add protocol admin to finalize projects)
