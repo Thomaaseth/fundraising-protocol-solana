@@ -86,17 +86,105 @@ export function findContributionPDA(
     const projectPDA = findProjectPDA(program, creator.publicKey, projectId);
     const vaultPDA = findVaultPDA(program, projectPDA);
   
-    await program.methods
+    const tx = await program.methods
       .initializeProject(title, description, new BN(fundingGoal))
       .accounts({
         creator: creator.publicKey,
-        project_counter: counterPDA, 
+        "projectCounter": counterPDA,
         project: projectPDA,
         vault: vaultPDA,
         systemProgram: anchor.web3.SystemProgram.programId,
-      })
+      } as any)
       .signers([creator])
       .rpc();
   
     return projectPDA;
   }
+
+  export async function contributeToProject(
+    program: Program<FundraisingProtocol>,
+    contributor: Keypair,
+    projectPDA: PublicKey,
+    amount: number // In lamports
+  ): Promise<PublicKey> {
+    const vaultPDA = findVaultPDA(program, projectPDA);
+    
+    // Get current timestamp
+    const slot = await program.provider.connection.getSlot();
+    const timestamp = await program.provider.connection.getBlockTime(slot);
+    
+    if (!timestamp) {
+      throw new Error("Could not get current timestamp");
+    }
+  
+    const contributionPDA = findContributionPDA(
+      program,
+      contributor.publicKey,
+      projectPDA,
+      timestamp
+    );
+  
+    await program.methods
+      .contribute(new BN(amount), new BN(timestamp))
+      .accounts({
+        contributor: contributor.publicKey,
+        project: projectPDA,
+        vault: vaultPDA,
+        contribution: contributionPDA,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+      })
+      .signers([contributor])
+      .rpc();
+  
+    return contributionPDA;
+  }
+
+  export async function finalizeProject(
+    program: Program<FundraisingProtocol>,
+    creator: Keypair,
+    projectPDA: PublicKey
+  ): Promise<void> {
+    const vaultPDA = findVaultPDA(program, projectPDA);
+  
+    await program.methods
+      .finalizeProject()
+      .accounts({
+        creator: creator.publicKey,
+        project: projectPDA,
+        vault: vaultPDA,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+      })
+      .signers([creator])
+      .rpc();
+  }
+  
+  export async function claimRefund(
+    program: Program<FundraisingProtocol>,
+    contributor: Keypair,
+    projectPDA: PublicKey,
+    contributionPDA: PublicKey
+  ): Promise<void> {
+    const vaultPDA = findVaultPDA(program, projectPDA);
+  
+    await program.methods
+      .claimRefund()
+      .accounts({
+        contributor: contributor.publicKey,
+        project: projectPDA,
+        vault: vaultPDA,
+        contribution: contributionPDA,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .signers([contributor])
+      .rpc();
+  }
+  
+  export async function getBalance(
+    connection: Connection,
+    publicKey: PublicKey
+  ): Promise<number> {
+    return connection.getBalance(publicKey);
+  }
+  
