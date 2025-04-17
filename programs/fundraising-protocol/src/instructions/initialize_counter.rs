@@ -16,7 +16,7 @@ pub struct InitializeCounter<'info> {
     #[account(
         init,
         payer = payer,
-        space = ANCHOR_DISCRIMINATOR + ProjectCounter::SIZE,
+        space = ANCHOR_DISCRIMINATOR + ProjectCounter::INIT_SPACE,
         seeds = [b"project-counter"],
         bump
     )]

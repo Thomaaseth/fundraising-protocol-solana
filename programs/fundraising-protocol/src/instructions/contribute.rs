@@ -69,7 +69,7 @@ pub struct Contribute<'info> {
     #[account(
         init,
         payer = contributor,
-        space = ANCHOR_DISCRIMINATOR + Contribution::SIZE,
+        space = ANCHOR_DISCRIMINATOR + Contribution::INIT_SPACE,
         seeds = [
             b"contribution", 
             contributor.key().as_ref(), 
