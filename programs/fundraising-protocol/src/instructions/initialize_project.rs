@@ -58,7 +58,7 @@ pub struct InitializeProject<'info> {
     #[account(
         init,
         payer = creator,
-        space = 8 + Project::SIZE,
+        space = ANCHOR_DISCRIMINATOR + Project::SIZE,
         seeds = [
             b"project",
             creator.key().as_ref(),
@@ -71,7 +71,7 @@ pub struct InitializeProject<'info> {
     #[account(
         init,
         payer = creator,
-        space = 8 + Vault::SIZE,
+        space = ANCHOR_DISCRIMINATOR + Vault::SIZE,
         seeds = [
             b"vault",
             project.key().as_ref()
