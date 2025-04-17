@@ -11,14 +11,14 @@ pub fn initialize_project(
     require!(!title.is_empty(), ErrorCode::EmptyTitle);
     require!(!description.is_empty(), ErrorCode::EmptyDescription);
     require!(title.len() <= MAX_TITLE_LENGTH, ErrorCode::TitleTooLong);
-    require!(
-        description.len() <= MAX_DESCRIPTION_LENGTH,
-        ErrorCode::DescriptionTooLong
-    );
+    require!(description.len() <= MAX_DESCRIPTION_LENGTH, ErrorCode::DescriptionTooLong);
     require!(funding_goal > 0, ErrorCode::InvalidFundingGoal);
 
     let current_time: i64 = Clock::get().unwrap().unix_timestamp;
     let counter = &mut ctx.accounts.project_counter;
+
+    require!(counter.count < counter.max, ErrorCode::CounterFull);
+
     counter.count += 1;
 
     // Init project account

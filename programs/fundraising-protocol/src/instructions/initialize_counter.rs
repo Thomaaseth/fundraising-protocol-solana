@@ -4,6 +4,7 @@ use crate::{constants::*, state::*};
 pub fn initialize_counter(ctx: Context<InitializeCounter>) -> Result<()> {
     let counter = &mut ctx.accounts.project_counter;
     counter.count = 0;
+    counter.max = 255;
     counter.bump = ctx.bumps.project_counter;
     Ok(())
 }
