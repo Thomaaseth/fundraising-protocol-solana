@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program::invoke, system_instruction};
-use crate::{errors::ErrorCode, state::*};
+use crate::{constants::*, errors::ErrorCode, state::*};
 
 pub fn contribute(ctx: Context<Contribute>, amount: u64) -> Result<()> {
     // Check inputs
@@ -69,7 +69,7 @@ pub struct Contribute<'info> {
     #[account(
         init,
         payer = contributor,
-        space = 8 + Contribution::SIZE,
+        space = ANCHOR_DISCRIMINATOR + Contribution::INIT_SPACE,
         seeds = [
             b"contribution", 
             contributor.key().as_ref(), 

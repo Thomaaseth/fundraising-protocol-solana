@@ -1,9 +1,10 @@
 use anchor_lang::prelude::*;
-use crate::state::*;
+use crate::{constants::*, state::*};
 
 pub fn initialize_counter(ctx: Context<InitializeCounter>) -> Result<()> {
     let counter = &mut ctx.accounts.project_counter;
     counter.count = 0;
+    counter.max = 255;
     counter.bump = ctx.bumps.project_counter;
     Ok(())
 }
@@ -16,7 +17,7 @@ pub struct InitializeCounter<'info> {
     #[account(
         init,
         payer = payer,
-        space = 8 + ProjectCounter::SIZE,
+        space = ANCHOR_DISCRIMINATOR + ProjectCounter::INIT_SPACE,
         seeds = [b"project-counter"],
         bump
     )]

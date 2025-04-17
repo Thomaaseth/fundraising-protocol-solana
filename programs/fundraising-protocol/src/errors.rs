@@ -2,38 +2,40 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum ErrorCode {
-    #[msg("Title cannot be empty")]
+    #[msg("Counter full")]
+    CounterFull,
+    #[msg("Title empty")]
     EmptyTitle,
-    #[msg("Description cannot be empty")]
+    #[msg("Description empty")]
     EmptyDescription,
-    #[msg("Title is too long")]
+    #[msg("Title too long")]
     TitleTooLong,
-    #[msg("Description is too long")]
+    #[msg("Description too long")]
     DescriptionTooLong,
-    #[msg("Funding goal must be greater than zero")]
+    #[msg("Funding goal is zero")]
     InvalidFundingGoal,
-    #[msg("Contribution amount must be greater than zero")]
+    #[msg("Contribution is zero")]
     InvalidContributionAmount,
-    #[msg("Project has expired")]
+    #[msg("Project expired")]
     ProjectExpired,
-    #[msg("Project is closed")]
+    #[msg("Project closed")]
     ProjectFinalized,
-    #[msg("Amount overflow occurred")]
+    #[msg("Amount overflow")]
     AmountOverflow,
-    #[msg("Project has already been finalized")]
+    #[msg("Project finalized")]
     ProjectAlreadyFinalized,
-    #[msg("Project deadline has not yet passed")]
+    #[msg("Project not expired")]
     ProjectNotExpired,
-    #[msg("Only the project creator can finalize the project")]
+    #[msg("Unauthorized")]
     UnauthorizedCreator,
-    #[msg("Project is not finalized yet")]
+    #[msg("Project not finalized")]
     ProjectNotFinalized,
-    #[msg("Cannot refund contributions to a successful project")]
+    #[msg("Project has succeeded")]
     ProjectSucceeded,
-    #[msg("This contribution has already been refunded")]
+    #[msg("Already refunded")]
     AlreadyRefunded,
-    #[msg("Only the original contributor can claim a refund")]
+    #[msg("Unauthorized")]
     UnauthorizedContributor,
-    #[msg("Invalid contribution for this project")]
+    #[msg("Invalid contribution")]
     InvalidContribution,
 }
