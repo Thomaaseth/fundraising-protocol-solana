@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-fundraising_protocol = "FimYszAo6d4WboiABnVFC4is6vebkEzbqmNVL7gkwg3H"
+fundraising_protocol = "AapiiRpbWWsNNTYS7isyG4KZZzQv1Bm8np8bcZs3mFnr"
 
 [registry]
 url = "https://api.apr.dev"

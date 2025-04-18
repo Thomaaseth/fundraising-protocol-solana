@@ -32,7 +32,7 @@ export function findProjectPDA(
         [
             Buffer.from("project"),
             creator.toBuffer(),
-            new BN(projectId).toArrayLike(Buffer, "le", 8)
+            Buffer.from([projectId])
         ],
         program.programId
     );
@@ -44,7 +44,10 @@ export function findVaultPDA(
     projectPDA: PublicKey
 ) {
     const [pda, _] = PublicKey.findProgramAddressSync(
-      [Buffer.from("vault"), projectPDA.toBuffer()],
+      [
+        Buffer.from("vault"), 
+        projectPDA.toBuffer()
+      ],
       program.programId
     );
     return pda;
@@ -82,19 +85,21 @@ export function findContributionPDA(
   
     const counterAccount = await program.account.projectCounter.fetch(counterPDA);
     const projectId = counterAccount.count + 1;
-  
+
     const projectPDA = findProjectPDA(program, creator.publicKey, projectId);
     const vaultPDA = findVaultPDA(program, projectPDA);
   
-    const tx = await program.methods
+    const accounts: any = {
+      creator: creator.publicKey,
+      project_counter: counterPDA,
+      project: projectPDA,
+      vault: vaultPDA,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    };
+  
+    await program.methods
       .initializeProject(title, description, new BN(fundingGoal))
-      .accounts({
-        creator: creator.publicKey,
-        "projectCounter": counterPDA,
-        project: projectPDA,
-        vault: vaultPDA,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      } as any)
+      .accounts(accounts)
       .signers([creator])
       .rpc();
   
@@ -109,7 +114,6 @@ export function findContributionPDA(
   ): Promise<PublicKey> {
     const vaultPDA = findVaultPDA(program, projectPDA);
     
-    // Get current timestamp
     const slot = await program.provider.connection.getSlot();
     const timestamp = await program.provider.connection.getBlockTime(slot);
     
@@ -125,7 +129,7 @@ export function findContributionPDA(
     );
   
     await program.methods
-      .contribute(new BN(amount), new BN(timestamp))
+      .contribute(new BN(amount))
       .accounts({
         contributor: contributor.publicKey,
         project: projectPDA,
@@ -133,7 +137,7 @@ export function findContributionPDA(
         contribution: contributionPDA,
         systemProgram: anchor.web3.SystemProgram.programId,
         clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
-      })
+      } as any) // bypass type assertions
       .signers([contributor])
       .rpc();
   
@@ -155,7 +159,7 @@ export function findContributionPDA(
         vault: vaultPDA,
         systemProgram: anchor.web3.SystemProgram.programId,
         clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
-      })
+      } as any)
       .signers([creator])
       .rpc();
   }
@@ -176,7 +180,7 @@ export function findContributionPDA(
         vault: vaultPDA,
         contribution: contributionPDA,
         systemProgram: anchor.web3.SystemProgram.programId,
-      })
+      } as any)
       .signers([contributor])
       .rpc();
   }
