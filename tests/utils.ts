@@ -32,7 +32,7 @@ export function findProjectPDA(
         [
             Buffer.from("project"),
             creator.toBuffer(),
-            Buffer.from([projectId])
+            Buffer.from([projectId]) // expect single byte
         ],
         program.programId
     );

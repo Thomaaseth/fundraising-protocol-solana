@@ -330,7 +330,7 @@ describe("Fundraising Protocol: Project Creation", () => {
     for (let i = 0; i < projectPDAs.length; i++) {
       const projectAccount = await program.account.project.fetch(projectPDAs[i]);
       expect(projectAccount.creator.toString()).to.equal(thirdCreator.publicKey.toString());
-      expect(projectAccount.title).to.equal(`Project ${i+1} by Third Creator`);
+      expect(projectAccount.title).to.equal(`project ${i+1} by third creator`);
       expect(projectAccount.projectId).to.equal(startingCount + i + 1);
     }
     
