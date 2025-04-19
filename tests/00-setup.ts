@@ -4,7 +4,7 @@ import { FundraisingProtocol } from "../target/types/fundraising_protocol";
 import { expect } from "chai";
 import * as utils from "./utils";
 
-describe("fundraising Protocol: Setup", () => {
+describe("Fundraising protocol: setup", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 

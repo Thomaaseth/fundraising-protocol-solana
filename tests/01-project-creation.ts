@@ -6,7 +6,7 @@ import { expect } from "chai";
 import * as utils from "./utils";
 import { BN } from "bn.js";
 
-describe("Fundraising Protocol: Project Creation", () => {
+describe("Fundraising protocol: project creation", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
@@ -17,7 +17,7 @@ describe("Fundraising Protocol: Project Creation", () => {
   let projectCounterPDA: anchor.web3.PublicKey;
   
   const testTitle = "Test Project";
-  const testDescription = "This is a test project";
+  const testDescription = "test project creation";
   const testFundingGoal = 5 * LAMPORTS_PER_SOL; // 5 SOL
 
   before(async () => {

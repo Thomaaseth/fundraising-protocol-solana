@@ -38,4 +38,6 @@ pub enum ErrorCode {
     UnauthorizedContributor,
     #[msg("Invalid contribution")]
     InvalidContribution,
+    #[msg("Invalid timestamp")]
+    InvalidTimeStamp
 }

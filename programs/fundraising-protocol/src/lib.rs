@@ -26,8 +26,8 @@ mod fundraising_protocol {
         instructions::initialize_project(ctx, title, description, funding_goal)
     }
 
-    pub fn contribute(ctx: Context<Contribute>, amount: u64) -> Result<()> {
-        instructions::contribute(ctx, amount)
+    pub fn contribute(ctx: Context<Contribute>, amount: u64, timestamp: i64) -> Result<()> {
+        instructions::contribute(ctx, amount, timestamp)
     }
 
     pub fn finalize_project(ctx: Context<FinalizeProject>) -> Result<()> {

@@ -110,16 +110,12 @@ export function findContributionPDA(
     program: Program<FundraisingProtocol>,
     contributor: Keypair,
     projectPDA: PublicKey,
-    amount: number // In lamports
+    amount: number // in lamports
   ): Promise<PublicKey> {
     const vaultPDA = findVaultPDA(program, projectPDA);
     
-    const slot = await program.provider.connection.getSlot();
-    const timestamp = await program.provider.connection.getBlockTime(slot);
-    
-    if (!timestamp) {
-      throw new Error("Could not get current timestamp");
-    }
+    // Get the current time for the PDA seed
+    const timestamp = Math.floor(Date.now() / 1000);
   
     const contributionPDA = findContributionPDA(
       program,
@@ -127,21 +123,26 @@ export function findContributionPDA(
       projectPDA,
       timestamp
     );
+   
+    try {
+      await program.methods
+        .contribute(new BN(amount), new BN(timestamp)) // Pass timestamp as second argument
+        .accounts({
+          contributor: contributor.publicKey,
+          project: projectPDA,
+          vault: vaultPDA,
+          contribution: contributionPDA,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        } as any)
+        .signers([contributor])
+        .rpc();
   
-    await program.methods
-      .contribute(new BN(amount))
-      .accounts({
-        contributor: contributor.publicKey,
-        project: projectPDA,
-        vault: vaultPDA,
-        contribution: contributionPDA,
-        systemProgram: anchor.web3.SystemProgram.programId,
-        clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
-      } as any) // bypass type assertions
-      .signers([contributor])
-      .rpc();
-  
-    return contributionPDA;
+      return contributionPDA;
+    } catch (error) {
+      console.error("Error contributing to project:", error);
+      throw error;
+    }
   }
 
   export async function finalizeProject(

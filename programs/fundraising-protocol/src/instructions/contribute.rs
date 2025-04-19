@@ -1,13 +1,17 @@
+use core::time;
+
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program::invoke, system_instruction};
 use crate::{constants::*, errors::ErrorCode, state::*};
 
-pub fn contribute(ctx: Context<Contribute>, amount: u64) -> Result<()> {
+pub fn contribute(ctx: Context<Contribute>, amount: u64, timestamp: i64) -> Result<()> {
     // Check inputs
     require!(amount > 0, ErrorCode::InvalidContributionAmount);
 
     // Check project still within deadline time
     let now = Clock::get()?.unix_timestamp;
+    require!(timestamp >= now - 60 && timestamp <= now + 60, ErrorCode::InvalidTimeStamp);
+
     let project = &ctx.accounts.project;
     require!(now < project.deadline, ErrorCode::ProjectExpired);
     require!(!project.is_finalized, ErrorCode::ProjectFinalized);
@@ -74,7 +78,7 @@ pub struct Contribute<'info> {
             b"contribution", 
             contributor.key().as_ref(), 
             project.key().as_ref(), 
-            &timestamp.to_le_bytes()
+            &timestamp.to_le_bytes(),
         ],
         bump
     )]
