@@ -151,6 +151,7 @@ export function findContributionPDA(
     projectPDA: PublicKey
   ): Promise<void> {
     const vaultPDA = findVaultPDA(program, projectPDA);
+
   
     await program.methods
       .finalizeProject()

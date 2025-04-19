@@ -27,7 +27,20 @@ pub fn initialize_project(
     project.title = title;
     project.description = description;
     project.funding_goal = funding_goal;
-    project.deadline = current_time + 30 * 24 * 60 * 60; // 30 days from init
+
+    /// Note: when compiled with the "test-mode" feature, this function
+    /// will set a very short deadline (20 seconds) to facilitate testing.
+    /// In production, the deadline is always 30 days.    
+    #[cfg(feature = "test-mode")]
+    {
+        project.deadline = current_time + 20; // 20 seconds for testing
+    }
+        
+    #[cfg(not(feature = "test-mode"))]
+    {
+        project.deadline = current_time + 30 * 24 * 60 * 60; // 30 days from init
+    }
+
     project.project_id = counter.count; // using counter as project_id
     project.is_success = false;
     project.is_finalized = false;
