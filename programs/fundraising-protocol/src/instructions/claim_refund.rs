@@ -22,19 +22,27 @@ pub fn claim_refund(ctx: Context<ClaimRefund>) -> Result<()> {
     let signer = &[&seeds[..]];
 
     // transfer SOL from vault to contributor
-    invoke_signed(
-        &system_instruction::transfer(
-            &vault.to_account_info().key(),
-            &ctx.accounts.contributor.key(),
-            refund_amount,
-        ),
-        &[
-            vault.to_account_info(),
-            ctx.accounts.contributor.to_account_info(),
-            ctx.accounts.system_program.to_account_info(),
-        ],
-        signer,
-    )?;
+    // Can't use invoke transfer on PDA account holding data
+    // invoke_signed(
+    //     &system_instruction::transfer(
+    //         &vault.to_account_info().key(),
+    //         &ctx.accounts.contributor.key(),
+    //         refund_amount,
+    //     ),
+    //     &[
+    //         vault.to_account_info(),
+    //         ctx.accounts.contributor.to_account_info(),
+    //         ctx.accounts.system_program.to_account_info(),
+    //     ],
+    //     signer,
+    // )?;
+
+    **ctx.accounts.vault.to_account_info().try_borrow_mut_lamports()? -= refund_amount;
+    **ctx.accounts.contributor.to_account_info().try_borrow_mut_lamports()? += refund_amount;
+
+    // added because we forgot to update the vault amount data after refunds
+    let mut vault_account = &mut ctx.accounts.vault;
+    vault_account.total_amount = vault_account.total_amount.saturating_sub(refund_amount);
 
     Ok(())
 }

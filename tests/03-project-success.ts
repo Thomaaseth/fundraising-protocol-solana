@@ -6,7 +6,7 @@ import { expect } from "chai";
 import * as utils from "./utils";
 import { BN } from "bn.js";
 
-describe("Fundraising Protocol: Project Success Path", () => {
+describe("Fundraising protocol: project success tests", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
@@ -176,6 +176,8 @@ describe("Fundraising Protocol: Project Success Path", () => {
   });
 
   it("prevents contributors from claiming refunds on successful projects", async () => {
+    const contributionAccount = await program.account.contribution.fetch(contribution1PDA);
+
     try {
       await program.methods
         .claimRefund()
@@ -191,6 +193,9 @@ describe("Fundraising Protocol: Project Success Path", () => {
       
       expect.fail("should not allow refund on successful project");
     } catch (error) {
+      // console.log("FULL ERROR:", JSON.stringify(error, null, 2));
+      // expect(true).to.be.true;
+
       expect(error.toString()).to.include("ProjectSucceeded");
       console.log("correctly prevented refund on successful project");
     }

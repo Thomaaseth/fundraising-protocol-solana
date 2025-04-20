@@ -140,7 +140,7 @@ export function findContributionPDA(
   
       return contributionPDA;
     } catch (error) {
-      console.error("Error contributing to project:", error);
+      // console.error("Error contributing to project:", error);
       throw error;
     }
   }
