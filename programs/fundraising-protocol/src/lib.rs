@@ -7,7 +7,7 @@ use instructions::*;
 
 // This is your program's public key and it will update
 // automatically when you build the project.
-declare_id!("AapiiRpbWWsNNTYS7isyG4KZZzQv1Bm8np8bcZs3mFnr");
+declare_id!("FimYszAo6d4WboiABnVFC4is6vebkEzbqmNVL7gkwg3H");
 
 #[program]
 mod fundraising_protocol {

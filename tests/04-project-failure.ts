@@ -192,6 +192,8 @@ it("prevents double refund claims", async () => {
     const contributionData = await program.account.contribution.fetch(contribution2PDA);
     console.log("contributor2 pubkey:", contributor2.publicKey.toString());
     console.log("contribution belongs to:", contributionData.user.toString());
+    console.log("timestamp used in original contribution:", contributionData.timestamp.toString());
+
     console.log("contribution timestamp:", contributionData.timestamp.toString());
 
     const initialContributor2Balance = await utils.getBalance(connection, contributor2.publicKey);
